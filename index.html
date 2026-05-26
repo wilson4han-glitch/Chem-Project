@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electrochemistry Simulation — AP Chemistry</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ Electrochemistry Simulation</h1>
+    <p>AP Chemistry · Galvanic &amp; Electrolytic Cells</p>
+  </div>
+</header>
+
+<!-- Tabs -->
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="galvanic-panel">Galvanic Cell (Voltaic)</button>
+  <button class="tab-btn"       data-tab="electro-panel">Electrolytic Cell</button>
+</nav>
+
+<!-- ===== GALVANIC PANEL ===== -->
+<section class="tab-panel active" id="galvanic-panel">
+  <div class="canvas-wrap">
+    <canvas id="galvanic-canvas" width="860" height="480"></canvas>
+  </div>
+
+  <aside class="controls">
+    <!-- Electrodes -->
+    <div class="control-group">
+      <h3>Electrodes</h3>
+      <label>Anode (oxidation — left)</label>
+      <select id="galvanic-anode"></select>
+      <label>Cathode (reduction — right)</label>
+      <select id="galvanic-cathode"></select>
+    </div>
+
+    <!-- Concentrations -->
+    <div class="control-group">
+      <h3>Ion Concentrations</h3>
+      <label>Anode [Mⁿ⁺]</label>
+      <div class="slider-row">
+        <input type="range" id="galvanic-conc-anode" min="0" max="2.0" step="0.01" value="1.0">
+        <span class="slider-val" id="galvanic-conc-anode-label">1.00 M</span>
+      </div>
+      <label>Cathode [Mⁿ⁺]</label>
+      <div class="slider-row">
+        <input type="range" id="galvanic-conc-cathode" min="0" max="2.0" step="0.01" value="1.0">
+        <span class="slider-val" id="galvanic-conc-cathode-label">1.00 M</span>
+      </div>
+    </div>
+
+    <!-- Playback -->
+    <div class="control-group">
+      <h3>Playback</h3>
+      <div class="btn-row">
+        <button class="btn btn-play"  id="galvanic-play">&#9654; Play</button>
+        <button class="btn btn-pause" id="galvanic-pause">&#9646;&#9646; Pause</button>
+        <button class="btn btn-reset" id="galvanic-reset">&#8635; Reset</button>
+      </div>
+      <br>
+      <label>Speed</label>
+      <div class="slider-row">
+        <input type="range" id="galvanic-speed" min="0.2" max="4.0" step="0.1" value="1.0">
+        <span class="slider-val" id="galvanic-speed-label">1.0×</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-box">
+      <strong>Galvanic Cell</strong><br>
+      Converts chemical energy to electrical energy spontaneously (ΔG &lt; 0).<br><br>
+      <strong>E°cell = E°cathode − E°anode</strong><br><br>
+      Nernst equation adjusts for non-standard concentrations. The voltmeter updates in real time.
+    </div>
+  </aside>
+</section>
+
+<!-- ===== ELECTROLYTIC PANEL ===== -->
+<section class="tab-panel" id="electro-panel">
+  <div class="canvas-wrap">
+    <canvas id="electro-canvas" width="860" height="480"></canvas>
+  </div>
+
+  <aside class="controls">
+    <!-- Electrodes -->
+    <div class="control-group">
+      <h3>Electrodes</h3>
+      <label>Anode (oxidation — left)</label>
+      <select id="electro-anode"></select>
+      <label>Cathode / Plating target (right)</label>
+      <select id="electro-cathode"></select>
+    </div>
+
+    <!-- Concentrations -->
+    <div class="control-group">
+      <h3>Ion Concentrations</h3>
+      <label>Anode [Mⁿ⁺]</label>
+      <div class="slider-row">
+        <input type="range" id="electro-conc-anode" min="0.01" max="2.0" step="0.01" value="1.0">
+        <span class="slider-val" id="electro-conc-anode-label">1.00 M</span>
+      </div>
+      <label>Cathode [Mⁿ⁺]</label>
+      <div class="slider-row">
+        <input type="range" id="electro-conc-cathode" min="0.01" max="2.0" step="0.01" value="1.0">
+        <span class="slider-val" id="electro-conc-cathode-label">1.00 M</span>
+      </div>
+    </div>
+
+    <!-- Applied Current -->
+    <div class="control-group">
+      <h3>Applied Current</h3>
+      <div class="slider-row">
+        <input type="range" id="electro-current" min="0.5" max="10.0" step="0.5" value="2.0">
+        <span class="slider-val" id="electro-current-label">2.0 A</span>
+      </div>
+    </div>
+
+    <!-- Playback -->
+    <div class="control-group">
+      <h3>Playback</h3>
+      <div class="btn-row">
+        <button class="btn btn-play"  id="electro-play">&#9654; Play</button>
+        <button class="btn btn-pause" id="electro-pause">&#9646;&#9646; Pause</button>
+        <button class="btn btn-reset" id="electro-reset">&#8635; Reset</button>
+      </div>
+      <br>
+      <label>Speed</label>
+      <div class="slider-row">
+        <input type="range" id="electro-speed" min="0.2" max="4.0" step="0.1" value="1.0">
+        <span class="slider-val" id="electro-speed-label">1.0×</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-box">
+      <strong>Electrolytic Cell</strong><br>
+      Uses external voltage to drive a non-spontaneous reaction (ΔG &gt; 0).<br><br>
+      Used for <strong>electroplating</strong> and industrial electrolysis.<br><br>
+      The battery displays the minimum voltage required to drive the reaction.
+    </div>
+  </aside>
+</section>
+
+<!-- Scripts (order matters) -->
+<script src="js/data.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/cell.js"></script>
+<script src="js/galvanic.js"></script>
+<script src="js/electrolytic.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
