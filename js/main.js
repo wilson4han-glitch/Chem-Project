@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cathodeSelect: document.getElementById('galvanic-cathode'),
     concAnode:    document.getElementById('galvanic-conc-anode'),
     concCathode:  document.getElementById('galvanic-conc-cathode'),
+    tempSlider:   document.getElementById('galvanic-temp'),
   };
   const galvCanvas = document.getElementById('galvanic-canvas');
   const galvCell = new GalvanicCell(galvCanvas, galvControls);
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     concAnode:    document.getElementById('electro-conc-anode'),
     concCathode:  document.getElementById('electro-conc-cathode'),
     current:      document.getElementById('electro-current'),
+    tempSlider:   document.getElementById('electro-temp'),
   };
   const electroCanvas = document.getElementById('electro-canvas');
   const electroCell = new ElectrolyticCell(electroCanvas, electroControls);
@@ -88,6 +90,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Rebuild on any control change
+    const tempEl  = document.getElementById(`${prefix}-temp`);
+    const tempLbl = document.getElementById(`${prefix}-temp-label`);
+    if (tempEl && tempLbl) {
+      tempEl.addEventListener('input', () => {
+        const c = parseInt(tempEl.value);
+        tempLbl.textContent = `${c}°C (${c + 273} K)`;
+        if (!cell.running) cell.draw();
+      });
+    }
+
     [`${prefix}-anode`, `${prefix}-cathode`,
      `${prefix}-conc-anode`, `${prefix}-conc-cathode`].forEach(id => {
       const el = document.getElementById(id);

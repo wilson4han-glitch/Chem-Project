@@ -25,9 +25,14 @@ function calcStandardCellPotential(cathode, anode) {
   return cathode.E0 - anode.E0;
 }
 
-// Nernst equation: E = E° - (0.0592/n) * log10(Q)
+// (RT·ln10)/F — equals 0.05916 at 298.15 K; varies with temperature
+function calcNernstFactor(tempK = 298.15) {
+  return (8.314 * tempK * Math.LN10) / 96485;
+}
+
+// Nernst equation: E = E° - ((RT·ln10)/(nF)) * log10(Q)
 // Q = [anode ion]^(n/nAnode) / [cathode ion]^(n/nCathode)  (LCM-balanced)
-function calcNernstPotential(cathode, anode, concCathode, concAnode) {
+function calcNernstPotential(cathode, anode, concCathode, concAnode, tempK = 298.15) {
   const E0 = calcStandardCellPotential(cathode, anode);
   const nAnode = anode.charge;
   const nCathode = cathode.charge;
@@ -36,7 +41,7 @@ function calcNernstPotential(cathode, anode, concCathode, concAnode) {
   const safeAnode   = Math.max(concAnode,   1e-15);
   const Q = Math.pow(safeAnode, n / nAnode) / Math.pow(safeCathode, n / nCathode);
   if (Q <= 0) return E0;
-  return E0 - (0.0592 / n) * Math.log10(Q);
+  return E0 - (calcNernstFactor(tempK) / n) * Math.log10(Q);
 }
 
 function lcm(a, b) {

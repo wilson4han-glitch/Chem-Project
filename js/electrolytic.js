@@ -15,7 +15,7 @@ class ElectrolyticCell extends CellRenderer {
     const a = this.getAnodeHR();
     const c = this.getCathodeHR();
     if (!a || !c) return 0;
-    return -calcNernstPotential(c, a, this.getConcCathode(), this.getConcAnode());
+    return -calcNernstPotential(c, a, this.getConcCathode(), this.getConcAnode(), this.getTempK());
   }
 
   getCurrent() {

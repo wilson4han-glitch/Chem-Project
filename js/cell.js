@@ -40,6 +40,13 @@ class CellRenderer {
   }
   isElectrolytic() { return false; }
 
+  getTempK() {
+    if (this.controls && this.controls.tempSlider) {
+      return parseFloat(this.controls.tempSlider.value) + 273.15;
+    }
+    return 298.15;
+  }
+
   reset() {
     this.elapsedTime = 0;
     this.anodeElectrodeH = LAYOUT.electrodeH;
@@ -191,7 +198,7 @@ class CellRenderer {
     if (a && c) {
       const n    = lcm(a.charge, c.charge);
       const E0   = calcStandardCellPotential(c, a);
-      const Kexp = (n * E0) / 0.0592;
+      const Kexp = (n * E0) / calcNernstFactor(this.getTempK());
       let Kstr;
       if      (Kexp >  300) Kstr = '≫ 1';
       else if (Kexp < -300) Kstr = '≪ 1';
@@ -383,15 +390,16 @@ class CellRenderer {
     const rate = 0.004 * dt * this.speed;
 
     if (this.isElectrolytic()) {
-      const anodeMax   = parseFloat(concAnode.max)   || 2.0;
-      const cathodeMin = parseFloat(concCathode.min) || 0.01;
-      const newAnode   = this._concAccAnode   + rate;
-      const newCathode = this._concAccCathode - rate;
+      const anodeMax    = parseFloat(concAnode.max)   || 2.0;
+      const cathodeMin  = parseFloat(concCathode.min) || 0.01;
+      const currentScale = this.getCurrent() / 2.0;
+      const newAnode   = this._concAccAnode   + rate * currentScale;
+      const newCathode = this._concAccCathode - rate * currentScale;
       if (newAnode > anodeMax || newCathode < cathodeMin) return;
       this._concAccAnode   = newAnode;
       this._concAccCathode = newCathode;
     } else {
-      const E = calcNernstPotential(cathode, anode, this._concAccCathode, this._concAccAnode);
+      const E = calcNernstPotential(cathode, anode, this._concAccCathode, this._concAccAnode, this.getTempK());
       if (E <= 0.002) {
         this._depleted = true;
         this.stop();
@@ -460,12 +468,12 @@ class CellRenderer {
     if (!a || !c) return;
 
     const n      = lcm(a.charge, c.charge);
-    const E      = calcNernstPotential(c, a, this.getConcCathode(), this.getConcAnode());
+    const E      = calcNernstPotential(c, a, this.getConcCathode(), this.getConcAnode(), this.getTempK());
     const E0     = calcStandardCellPotential(c, a);
     const deltaG = -(n * 96485 * E) / 1000; // kJ/mol
 
-    // K = 10^(nE°/0.0592); avoid Infinity in display
-    const Kexp     = (n * E0) / 0.0592;
+    // K = 10^(nE° / nernstFactor); avoid Infinity in display
+    const Kexp     = (n * E0) / calcNernstFactor(this.getTempK());
     let Kstr;
     if      (Kexp >  300) Kstr = '≫ 1';
     else if (Kexp < -300) Kstr = '≪ 1';
