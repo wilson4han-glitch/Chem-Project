@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/Users/WilsonHan/Desktop/Chem Project/.claude/review-agent.sh\""
+          },
+          {
+            "type": "command",
+            "command": "cd \"/Users/WilsonHan/Desktop/Chem Project\" && f=$(jq -r '.tool_input.file_path // \"\"') && [ -n \"$f\" ] && git add \"$f\" && fname=$(basename \"$f\") && git commit -m \"auto-save: update $fname\" && git push 2>/dev/null || true",
+            "statusMessage": "Auto-saving to GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}

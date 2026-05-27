@@ -10,6 +10,20 @@ class ElectrolyticCell extends CellRenderer {
   getCathodeHR()   { return getById(this.controls.cathodeSelect.value); }
   isElectrolytic() { return true; }
 
+  canAdvance() {
+    const req = this.getRequiredVoltage();
+    return req <= 0 || this.getCurrent() >= req;
+  }
+
+  start() {
+    if (!this.canAdvance()) {
+      this.stop();
+      this.draw();
+      return;
+    }
+    super.start();
+  }
+
   // Voltage required = -E°cell (must overcome spontaneous direction)
   getRequiredVoltage() {
     const a = this.getAnodeHR();

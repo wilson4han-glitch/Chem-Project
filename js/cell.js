@@ -40,10 +40,9 @@ class CellRenderer {
     return this.controls ? parseFloat(this.controls.concCathode.value) : 1.0;
   }
   isElectrolytic() { return false; }
-  // FIXED: base-class stub so _tickConcentrations can safely call this.getCurrent() in the
-  // electrolytic branch without a TypeError if a subclass forgets to override it.
-  // ElectrolyticCell overrides this to read the current slider.
   getCurrent()     { return 2.0; }
+  // Subclasses override to block the animation loop under specific conditions.
+  canAdvance()     { return true; }
 
   getTempK() {
     if (this.controls && this.controls.tempSlider) {
@@ -145,10 +144,16 @@ class CellRenderer {
 
   _loop(ts) {
     if (!this.running) return;
+    if (!this.canAdvance()) {
+      this.running = false;
+      this.rafId = null;
+      this.draw();
+      return;
+    }
     const dt = Math.min((ts - this.lastTs) / 16.67, 3);
     this.lastTs = ts;
     this.elapsedTime += (dt * this.speed) / 60;
-    this.realTime += dt / 60;   // FIXED: accumulate unscaled seconds (speed-independent)
+    this.realTime += dt / 60;
     this.particles.update(dt * this.speed);
     this._updateElectrodes(dt);
     this._tickConcentrations(dt);

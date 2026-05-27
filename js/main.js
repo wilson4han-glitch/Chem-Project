@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (currentEl && currentLbl) {
     currentEl.addEventListener('input', () => {
       currentLbl.textContent = parseFloat(currentEl.value).toFixed(1) + ' A';
+      if (!electroCell.running) electroCell.draw();
     });
   }
 
