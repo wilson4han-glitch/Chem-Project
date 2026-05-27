@@ -116,6 +116,7 @@ class CellRenderer {
   }
 
   start() {
+    if (this._depleted) return;
     if (this.elapsedTime === 0) this._snapshotConcentrations();
     this._initAccumulators();
     if (this.rafId) cancelAnimationFrame(this.rafId);

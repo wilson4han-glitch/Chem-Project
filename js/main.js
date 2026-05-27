@@ -82,6 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const speedSlider = document.getElementById(`${prefix}-speed`);
       speedSlider.value = '1.0';
       document.getElementById(`${prefix}-speed-label`).textContent = '1.0×';
+      const tempSlider = document.getElementById(`${prefix}-temp`);
+      if (tempSlider) {
+        tempSlider.value = '25';
+        document.getElementById(`${prefix}-temp-label`).textContent = '25°C (298 K)';
+      }
       cell.draw();
     });
     document.getElementById(`${prefix}-speed`).addEventListener('input', e => {
@@ -104,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
      `${prefix}-conc-anode`, `${prefix}-conc-cathode`].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener('change', () => { rebuildAndDraw(cell); if (cell.running) { cell.stop(); cell.start(); } });
+      el.addEventListener('change', () => { if (cell._depleted) cell.reset(); rebuildAndDraw(cell); if (cell.running) { cell.stop(); cell.start(); } });
       el.addEventListener('input',  () => {
         if (id.includes('conc')) {
           cell._concAccAnode = null;
