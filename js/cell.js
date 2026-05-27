@@ -18,6 +18,7 @@ class CellRenderer {
     this.rafId = null;
     this.speed = 1.0;
     this.elapsedTime = 0;
+    this.realTime = 0;          // FIXED: unscaled seconds, for Faraday mass calculation
     this._concSnapshot = null;
     this._concAccAnode = null;
     this._concAccCathode = null;
@@ -39,6 +40,10 @@ class CellRenderer {
     return this.controls ? parseFloat(this.controls.concCathode.value) : 1.0;
   }
   isElectrolytic() { return false; }
+  // FIXED: base-class stub so _tickConcentrations can safely call this.getCurrent() in the
+  // electrolytic branch without a TypeError if a subclass forgets to override it.
+  // ElectrolyticCell overrides this to read the current slider.
+  getCurrent()     { return 2.0; }
 
   getTempK() {
     if (this.controls && this.controls.tempSlider) {
@@ -49,6 +54,7 @@ class CellRenderer {
 
   reset() {
     this.elapsedTime = 0;
+    this.realTime = 0;          // FIXED: unscaled wall-clock seconds, used by Faraday calculation
     this.anodeElectrodeH = LAYOUT.electrodeH;
     this.cathodeElectrodeH = LAYOUT.electrodeH;
     this._concAccAnode = null;
@@ -118,7 +124,11 @@ class CellRenderer {
   start() {
     if (this._depleted) return;
     if (this.elapsedTime === 0) this._snapshotConcentrations();
-    this._initAccumulators();
+    // FIXED: only initialise accumulators when null (fresh start or after reset/conc change).
+    // Calling _initAccumulators() unconditionally would overwrite mid-run accumulated
+    // concentrations every time start() is called (e.g. stop → play, or electrode change
+    // while running), discarding all progress.
+    if (this._concAccAnode === null) this._initAccumulators();
     if (this.rafId) cancelAnimationFrame(this.rafId);
     this.running = true;
     this.lastTs = performance.now();
@@ -138,6 +148,7 @@ class CellRenderer {
     const dt = Math.min((ts - this.lastTs) / 16.67, 3);
     this.lastTs = ts;
     this.elapsedTime += (dt * this.speed) / 60;
+    this.realTime += dt / 60;   // FIXED: accumulate unscaled seconds (speed-independent)
     this.particles.update(dt * this.speed);
     this._updateElectrodes(dt);
     this._tickConcentrations(dt);

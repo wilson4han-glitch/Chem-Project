@@ -27,7 +27,11 @@ class ElectrolyticCell extends CellRenderer {
   _calcMassDeposited() {
     const cathode = this.getCathodeHR();
     if (!cathode) return 0;
-    return (cathode.molarMass * this.getCurrent() * this.elapsedTime) / (cathode.charge * 96485);
+    // FIXED: use this.realTime (unscaled seconds) not this.elapsedTime (speed-scaled).
+    // Faraday's law is m = (M·I·t) / (n·F) where t is real time in seconds.
+    // elapsedTime accumulates dt*speed/60 per frame, so at 4× speed it is 4× too large,
+    // producing physically incorrect mass values. realTime accumulates dt/60 per frame.
+    return (cathode.molarMass * this.getCurrent() * this.realTime) / (cathode.charge * 96485);
   }
 
   drawCircuitExtras() {
@@ -45,6 +49,25 @@ class ElectrolyticCell extends CellRenderer {
     this._drawArrow(ctx, arrowX + 30, wireY - 3, arrowX - 10, wireY - 3, '#ffeb3b', '');
 
     this._drawThermodynamicsPanel();
+
+    // Show a warning when the applied current is below the required voltage (used as a
+    // proxy for insufficient power: higher required voltage demands more current).
+    const current = this.getCurrent();
+    if (required > 0 && current < required) {
+      const { canvasW, canvasH } = LAYOUT;
+      ctx.save();
+      ctx.fillStyle = 'rgba(183, 28, 28, 0.88)';
+      ctx.fillRect(0, canvasH - 54, canvasW, 54);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(
+        `⚡ NOT ENOUGH CURRENT — need ≥ ${required.toFixed(2)} A to drive this reaction`,
+        canvasW / 2, canvasH - 27
+      );
+      ctx.restore();
+    }
   }
 
   _drawBattery(ctx, cx, cy, requiredV) {

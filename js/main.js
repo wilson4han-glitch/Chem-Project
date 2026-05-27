@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('galvanic-anode').value   = 'zn';
   document.getElementById('galvanic-cathode').value = 'cu';
   document.getElementById('electro-anode').value    = 'cu';
-  document.getElementById('electro-cathode').value  = 'ag';
+  document.getElementById('electro-cathode').value  = 'zn';
 
   // --- Galvanic cell setup ---
   const galvControls = {
@@ -122,6 +122,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   wireControls(galvCell,   'galvanic');
   wireControls(electroCell, 'electro');
+
+  // Electrolytic cell: only allow cathodes with lower E° than the anode so the
+  // reaction is non-spontaneous and actually requires external power.
+  function filterElectroCathodeOptions() {
+    const anodeSel   = document.getElementById('electro-anode');
+    const cathodeSel = document.getElementById('electro-cathode');
+    const anodeHR    = getById(anodeSel.value);
+    const prevValue  = cathodeSel.value;
+
+    // Repopulate cathode select — only elements with E0 strictly below the anode's E0.
+    cathodeSel.innerHTML = '';
+    HALF_REACTIONS
+      .filter(hr => !anodeHR || hr.E0 < anodeHR.E0)
+      .forEach(hr => {
+        const opt = document.createElement('option');
+        opt.value = hr.id;
+        opt.textContent = `${hr.metal}  (${hr.label}, E°=${hr.E0 >= 0 ? '+' : ''}${hr.E0} V)`;
+        cathodeSel.appendChild(opt);
+      });
+
+    // Restore previous cathode if it's still in the list; otherwise the first option is selected.
+    if ([...cathodeSel.options].some(o => o.value === prevValue)) {
+      cathodeSel.value = prevValue;
+    }
+
+    if (cathodeSel.value !== prevValue) {
+      if (electroCell._depleted) electroCell.reset();
+      rebuildAndDraw(electroCell);
+      if (electroCell.running) { electroCell.stop(); electroCell.start(); }
+    }
+  }
+
+  document.getElementById('electro-anode').addEventListener('change', filterElectroCathodeOptions);
+  filterElectroCathodeOptions();
 
   // Current label for electrolytic
   const currentEl = document.getElementById('electro-current');
