@@ -38,7 +38,7 @@ class ParticleSystem {
   initParticles(electronPath, cationPath, anionPath, anodeHR, cathodeHR, count, speed) {
     this.reset();
     for (let i = 0; i < count; i++) {
-      this.spawnElectron(electronPath, speed * 1.4);
+      this.spawnElectron(electronPath, speed * 1.26);
     }
     for (let i = 0; i < Math.floor(count * 0.6); i++) {
       this.spawnIon(cationPath, speed * 0.6, cathodeHR.color, cathodeHR.ion, '+');
