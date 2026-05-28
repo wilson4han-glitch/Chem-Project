@@ -191,28 +191,34 @@ class CellRenderer {
     const { canvasW, canvasH } = LAYOUT;
     const cx = canvasW / 2;
 
-    ctx.fillStyle = 'rgba(0,0,0,0.68)';
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.fillRect(0, 0, canvasW, canvasH);
 
-    // Heading
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ef5350';
-    ctx.font = 'bold 36px sans-serif';
-    ctx.fillText('BATTERY DEAD', cx, canvasH / 2 - 62);
+
+    // Heading
+    ctx.fillStyle = '#66bb6a';
+    ctx.font = 'bold 34px sans-serif';
+    ctx.fillText('EQUILIBRIUM REACHED', cx, canvasH / 2 - 80);
+
+    // Subheading
+    ctx.fillStyle = 'rgba(180,210,255,0.9)';
+    ctx.font = '15px monospace';
+    ctx.fillText('E = 0.000 V  ·  ΔG = 0  ·  No net reaction', cx, canvasH / 2 - 46);
 
     // Divider
-    ctx.strokeStyle = 'rgba(239,83,80,0.45)';
+    ctx.strokeStyle = 'rgba(102,187,106,0.4)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(cx - 170, canvasH / 2 - 38);
-    ctx.lineTo(cx + 170, canvasH / 2 - 38);
+    ctx.moveTo(cx - 200, canvasH / 2 - 26);
+    ctx.lineTo(cx + 200, canvasH / 2 - 26);
     ctx.stroke();
 
-    // Equilibrium stats
     const a = this.getAnodeHR();
     const c = this.getCathodeHR();
     if (a && c) {
+      // K value
       const n    = lcm(a.charge, c.charge);
       const E0   = calcStandardCellPotential(c, a);
       const Kexp = (n * E0) / calcNernstFactor(this.getTempK());
@@ -226,16 +232,25 @@ class CellRenderer {
         Kstr = `${mantissa.toFixed(2)} × 10^${expFloor}`;
       }
 
-      ctx.fillStyle = 'rgba(180,210,255,0.92)';
-      ctx.font = '14px monospace';
-      ctx.fillText('Equilibrium reached  ·  E = 0.000 V  ·  ΔG = 0', cx, canvasH / 2 - 12);
-      ctx.fillText(`Q = K = ${Kstr}`, cx, canvasH / 2 + 14);
+      ctx.fillStyle = 'rgba(255,236,130,0.95)';
+      ctx.font = 'bold 15px monospace';
+      ctx.fillText(`Q = K = ${Kstr}`, cx, canvasH / 2 - 4);
+
+      // Final equilibrium concentrations
+      const concA = Math.max(this.getConcAnode(),   1e-15);
+      const concC = Math.max(this.getConcCathode(), 1e-15);
+      const concAstr = concA < 0.001 ? concA.toExponential(2) : concA.toFixed(4);
+      const concCstr = concC < 0.001 ? concC.toExponential(2) : concC.toFixed(4);
+
+      ctx.fillStyle = 'rgba(180,210,255,0.85)';
+      ctx.font = '13px monospace';
+      ctx.fillText(`[${a.ion}]eq = ${concAstr} M   [${c.ion}]eq = ${concCstr} M`, cx, canvasH / 2 + 24);
     }
 
     // Footer
-    ctx.fillStyle = 'rgba(190,190,190,0.75)';
+    ctx.fillStyle = 'rgba(170,170,170,0.7)';
     ctx.font = '13px sans-serif';
-    ctx.fillText('No more work can be extracted — press Reset to restart', cx, canvasH / 2 + 50);
+    ctx.fillText('The driving force is exhausted — press Reset to restart', cx, canvasH / 2 + 58);
     ctx.textBaseline = 'alphabetic';
   }
 
@@ -417,7 +432,10 @@ class CellRenderer {
       this._concAccCathode = newCathode;
     } else {
       const E = calcNernstPotential(cathode, anode, this._concAccCathode, this._concAccAnode, this.getTempK());
-      if (E <= 0.002) {
+      // Deplete when voltage reaches zero (low-K cells) OR when the cathode
+      // reactant is fully consumed (high-K cells like Zn/Cu whose internal
+      // concentration floor keeps E >> 0.002 V even after the reactant is gone).
+      if (E <= 0.002 || this._concAccCathode <= 0) {
         this._depleted = true;
         this.stop();
       } else {
