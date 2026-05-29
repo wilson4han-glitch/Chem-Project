@@ -185,7 +185,8 @@ class CellRenderer {
     this.particles.draw(ctx);
     this._drawLabels();
     this._drawTimer();
-    if (this._depleted) this._drawDepletedOverlay();
+    if (this._depleted)  this._drawDepletedOverlay();
+    if (this._exhausted) this._drawExhaustedOverlay();
   }
 
   _drawDepletedOverlay() {
