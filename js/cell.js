@@ -257,6 +257,59 @@ class CellRenderer {
     ctx.textBaseline = 'alphabetic';
   }
 
+  _drawExhaustedOverlay() {
+    const ctx = this.ctx;
+    const { canvasW, canvasH } = LAYOUT;
+    const cx = canvasW / 2;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = '#ffa726';
+    ctx.font = 'bold 34px sans-serif';
+    ctx.fillText('SOLUTION EXHAUSTED', cx, canvasH / 2 - 80);
+
+    ctx.fillStyle = 'rgba(180,210,255,0.9)';
+    ctx.font = '15px monospace';
+    ctx.fillText('Cathode ions fully depleted — plating stops', cx, canvasH / 2 - 46);
+
+    ctx.strokeStyle = 'rgba(255,167,38,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - 200, canvasH / 2 - 26);
+    ctx.lineTo(cx + 200, canvasH / 2 - 26);
+    ctx.stroke();
+
+    const a = this.getAnodeHR();
+    const c = this.getCathodeHR();
+    if (a && c) {
+      const concA = this.getConcAnode();
+      const concC = this.getConcCathode();
+      ctx.fillStyle = 'rgba(180,210,255,0.85)';
+      ctx.font = '13px monospace';
+      ctx.fillText(
+        `[${a.ion}] = ${concA.toFixed(4)} M   [${c.ion}] ≈ 0 M`,
+        cx, canvasH / 2 - 4
+      );
+
+      if (this.realTime !== undefined) {
+        const cathode = c;
+        const mass = (cathode.molarMass * this.getCurrent() * this.realTime) / (cathode.charge * 96485);
+        ctx.fillStyle = 'rgba(255,224,130,0.95)';
+        ctx.font = 'bold 15px monospace';
+        ctx.fillText(`Total deposited: ${mass.toFixed(4)} g of ${cathode.metal}`, cx, canvasH / 2 + 24);
+      }
+    }
+
+    ctx.fillStyle = 'rgba(170,170,170,0.7)';
+    ctx.font = '13px sans-serif';
+    ctx.fillText('No ions remain to reduce — press Reset to restart', cx, canvasH / 2 + 58);
+    ctx.textBaseline = 'alphabetic';
+  }
+
   _drawBackground() {
     const ctx = this.ctx;
     ctx.fillStyle = '#1a1a2e';
