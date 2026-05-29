@@ -26,6 +26,7 @@ class CellRenderer {
     this.cathodeElectrodeH = LAYOUT.electrodeH;
     this.lastTs = null;
     this._depleted = false;
+    this._exhausted = false;
   }
 
   // Subclasses override
