@@ -123,7 +123,7 @@ class CellRenderer {
   }
 
   start() {
-    if (this._depleted) return;
+    if (this._depleted || this._exhausted) return;
     if (this.elapsedTime === 0) this._snapshotConcentrations();
     // FIXED: only initialise accumulators when null (fresh start or after reset/conc change).
     // Calling _initAccumulators() unconditionally would overwrite mid-run accumulated
