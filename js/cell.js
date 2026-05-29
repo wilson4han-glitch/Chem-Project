@@ -60,6 +60,7 @@ class CellRenderer {
     this._concAccAnode = null;
     this._concAccCathode = null;
     this._depleted = false;
+    this._exhausted = false;
     this._restoreConcentrations();
     this.rebuildParticles();
   }
