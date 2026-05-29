@@ -430,7 +430,13 @@ class CellRenderer {
       const currentScale = this.getCurrent() / 2.0;
       const newAnode   = this._concAccAnode   + rate * currentScale;
       const newCathode = this._concAccCathode - rate * currentScale;
-      if (newAnode > anodeMax || newCathode < cathodeMin) return;
+      if (newCathode < cathodeMin) {
+        this._concAccCathode = cathodeMin;
+        this._exhausted = true;
+        this.stop();
+        return;
+      }
+      if (newAnode > anodeMax) return;
       this._concAccAnode   = newAnode;
       this._concAccCathode = newCathode;
     } else {
