@@ -85,23 +85,16 @@ class CellRenderer {
     const cathodeTopX = rb.x + rb.w / 2;
     const wireY = lb.y - 55;
 
-    let electronPath;
-    if (!this.isElectrolytic()) {
-      electronPath = [
-        { x: anodeTopX, y: lb.y + 30 },
-        { x: anodeTopX, y: wireY },
-        { x: cathodeTopX, y: wireY },
-        { x: cathodeTopX, y: rb.y + 30 },
-      ];
-    } else {
-      // reversed direction for electrolytic
-      electronPath = [
-        { x: cathodeTopX, y: rb.y + 30 },
-        { x: cathodeTopX, y: wireY },
-        { x: anodeTopX, y: wireY },
-        { x: anodeTopX, y: lb.y + 30 },
-      ];
-    }
+    // FIXED: electrons always flow anode (left) -> cathode (right) in the external wire
+    // for both galvanic and electrolytic cells. In galvanic the reaction drives this
+    // spontaneously; in electrolytic the external battery forces the same direction.
+    // The old reversed path for electrolytic was physically incorrect.
+    const electronPath = [
+      { x: anodeTopX, y: lb.y + 30 },
+      { x: anodeTopX, y: wireY },
+      { x: cathodeTopX, y: wireY },
+      { x: cathodeTopX, y: rb.y + 30 },
+    ];
 
     // Salt bridge: cations move toward cathode (right), anions toward anode (left)
     const bridgeY = LAYOUT.saltBridge.y + LAYOUT.saltBridge.h / 2;

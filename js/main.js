@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tempEl && tempLbl) {
       tempEl.addEventListener('input', () => {
         const c = parseInt(tempEl.value);
-        tempLbl.textContent = `${c}°C (${c + 273} K)`;
+        tempLbl.textContent = `${c}°C (${Math.round(c + 273.15)} K)`;  // FIXED: matches getTempK() which adds 273.15
         if (!cell.running) cell.draw();
       });
     }
@@ -109,7 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
      `${prefix}-conc-anode`, `${prefix}-conc-cathode`].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener('change', () => { if (cell._depleted) cell.reset(); rebuildAndDraw(cell); if (cell.running) { cell.stop(); cell.start(); } });
+      // FIXED: also reset when _exhausted (electrolytic solution depleted) so changing
+      // electrodes or concentrations clears the exhausted overlay and restarts correctly.
+      el.addEventListener('change', () => { if (cell._depleted || cell._exhausted) cell.reset(); rebuildAndDraw(cell); if (cell.running) { cell.stop(); cell.start(); } });
       el.addEventListener('input',  () => {
         if (id.includes('conc')) {
           cell._concAccAnode = null;
@@ -148,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (cathodeSel.value !== prevValue) {
-      if (electroCell._depleted) electroCell.reset();
+      // FIXED: also reset when _exhausted so a new anode selection clears the overlay.
+      if (electroCell._depleted || electroCell._exhausted) electroCell.reset();
       rebuildAndDraw(electroCell);
       if (electroCell.running) { electroCell.stop(); electroCell.start(); }
     }

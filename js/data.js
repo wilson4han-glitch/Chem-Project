@@ -55,9 +55,12 @@ function getHalfReactionString(hr, isAnode) {
   if (isAnode  && hr.oxidationStr) return hr.oxidationStr;
   if (!isAnode && hr.reductionStr) return hr.reductionStr;
   const n = hr.charge;
+  // FIXED: omit the coefficient '1' when n===1 — standard chemistry notation
+  // writes 'e⁻' not '1e⁻' (e.g., Ag⁺ + e⁻ → Ag).
+  const eStr = n === 1 ? 'e⁻' : `${n}e⁻`;
   if (isAnode) {
-    return `${hr.metal} → ${hr.ion} + ${n}e⁻   (oxidation)`;
+    return `${hr.metal} → ${hr.ion} + ${eStr}   (oxidation)`;
   } else {
-    return `${hr.ion} + ${n}e⁻ → ${hr.metal}   (reduction)`;
+    return `${hr.ion} + ${eStr} → ${hr.metal}   (reduction)`;
   }
 }

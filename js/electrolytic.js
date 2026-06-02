@@ -58,9 +58,10 @@ class ElectrolyticCell extends CellRenderer {
 
     this._drawBattery(ctx, midX, wireY, required);
 
-    // Electron flow arrow reversed (right to left on wire above battery)
-    const arrowX = midX - 50;
-    this._drawArrow(ctx, arrowX + 30, wireY - 3, arrowX - 10, wireY - 3, '#ffeb3b', '');
+    // FIXED: electron flow arrow now points LEFT to RIGHT (anode -> cathode),
+    // matching the corrected electron particle path. Previously pointed right to left.
+    const arrowX = midX + 60;
+    this._drawArrow(ctx, arrowX, wireY - 3, arrowX + 40, wireY - 3, '#ffeb3b', '  e⁻');
 
     this._drawThermodynamicsPanel();
 
