@@ -489,8 +489,7 @@ class CellRenderer {
         this.stop();
         return;
       }
-      if (newAnode > anodeMax) return;
-      this._concAccAnode   = newAnode;
+      this._concAccAnode   = Math.min(newAnode, anodeMax);
       this._concAccCathode = newCathode;
     } else {
       const E = calcNernstPotential(cathode, anode, this._concAccCathode, this._concAccAnode, this.getTempK());
