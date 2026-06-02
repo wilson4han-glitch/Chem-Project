@@ -311,6 +311,44 @@ class CellRenderer {
     ctx.textBaseline = 'alphabetic';
   }
 
+  _drawLegend() {
+    const ctx = this.ctx;
+    const { canvasH } = LAYOUT;
+    const cathode = this.getCathodeHR();
+    const r = 5;
+    const y = canvasH - 14;
+    let x = 10;
+
+    const items = [
+      { color: '#ffeb3b', charge: '−', text: 'Electrons (wire)' },
+      { color: cathode ? cathode.color : '#9e9e9e', charge: '+', text: 'Cations → cathode' },
+      { color: '#ff7043', charge: '−', text: 'Anions → anode' },
+    ];
+
+    ctx.textBaseline = 'middle';
+    for (const item of items) {
+      ctx.beginPath();
+      ctx.arc(x + r, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = item.color;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 7px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(item.charge, x + r, y);
+
+      ctx.fillStyle = 'rgba(200,200,200,0.7)';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(item.text, x + r * 2 + 4, y);
+      x += r * 2 + 4 + ctx.measureText(item.text).width + 14;
+    }
+    ctx.textBaseline = 'alphabetic';
+  }
+
   _drawBackground() {
     const ctx = this.ctx;
     ctx.fillStyle = '#1a1a2e';
