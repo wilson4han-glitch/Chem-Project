@@ -132,7 +132,7 @@ class ElectrolyticCell extends CellRenderer {
     ctx.textBaseline = 'alphabetic';
   }
 
-  _drawArrow(ctx, x1, y1, x2, y2, color) {
+  _drawArrow(ctx, x1, y1, x2, y2, color, label) {
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.lineWidth = 2;
@@ -147,6 +147,12 @@ class ElectrolyticCell extends CellRenderer {
     ctx.lineTo(x2 - 10 * Math.cos(angle + 0.4), y2 - 10 * Math.sin(angle + 0.4));
     ctx.closePath();
     ctx.fill();
+    if (label) {
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = color;
+      ctx.fillText(label, x2 + 4, y2 + 4);
+    }
   }
 
   _drawLabels() {
