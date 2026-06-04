@@ -78,7 +78,7 @@ class ElectrolyticCell extends CellRenderer {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(
-        `⚡ NOT ENOUGH CURRENT — need ≥ ${required.toFixed(2)} A to drive this reaction`,
+        `⚡ INSUFFICIENT POWER — reaction requires ≥ ${required.toFixed(2)} V; increase current`,
         canvasW / 2, canvasH - 27
       );
       ctx.restore();
