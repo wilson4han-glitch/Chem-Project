@@ -105,13 +105,53 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const isElectrodeId = id => id.endsWith('-anode') || id.endsWith('-cathode');
+
     [`${prefix}-anode`, `${prefix}-cathode`,
      `${prefix}-conc-anode`, `${prefix}-conc-cathode`].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      // FIXED: also reset when _exhausted (electrolytic solution depleted) so changing
-      // electrodes or concentrations clears the exhausted overlay and restarts correctly.
-      el.addEventListener('change', () => { if (cell._depleted || cell._exhausted) cell.reset(); rebuildAndDraw(cell); if (cell.running) { cell.stop(); cell.start(); } });
+      el.addEventListener('change', () => {
+        if (isElectrodeId(id)) {
+          // FIXED: changing electrodes is a fresh experiment. The previous logic
+          // only reset when the cell was _depleted/_exhausted, so a mid-run or
+          // post-pause electrode swap left stale accumulators and a non-zero
+          // elapsedTime in place — start() then skipped both _snapshotConcentrations()
+          // and _initAccumulators(), and the new pair ran against the old pair's
+          // ion concentrations, often tripping instant depletion and making Play
+          // appear to do nothing. Clear all run state so Play starts cleanly from
+          // the current slider values.
+          const wasRunning = cell.running;
+          cell.stop();
+          cell.elapsedTime = 0;
+          cell.realTime = 0;
+          cell.anodeElectrodeH = LAYOUT.electrodeH;
+          cell.cathodeElectrodeH = LAYOUT.electrodeH;
+          cell._concAccAnode = null;
+          cell._concAccCathode = null;
+          cell._depleted = false;
+          cell._exhausted = false;
+          cell._concSnapshot = null;
+          rebuildAndDraw(cell);
+          if (wasRunning) cell.start();
+        } else {
+          // Concentration slider released. If the cell was depleted/exhausted,
+          // clear those flags so Play works again — but do NOT call cell.reset(),
+          // which would _restoreConcentrations() and snap the slider back to the
+          // pre-run snapshot, undoing the user's drag.
+          if (cell._depleted || cell._exhausted) {
+            cell._depleted = false;
+            cell._exhausted = false;
+            cell.elapsedTime = 0;
+            cell.realTime = 0;
+            cell._concAccAnode = null;
+            cell._concAccCathode = null;
+            cell._concSnapshot = null;
+          }
+          rebuildAndDraw(cell);
+          if (cell.running) { cell.stop(); cell.start(); }
+        }
+      });
       el.addEventListener('input',  () => {
         if (id.includes('conc')) {
           cell._concAccAnode = null;
